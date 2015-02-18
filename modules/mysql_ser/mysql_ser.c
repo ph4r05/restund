@@ -100,6 +100,8 @@ static int accounts_getall(const char *realm, restund_db_account_h *acch,
 {
 	MYSQL_RES *res;
 	int err = 0;
+	unsigned long ctr = 0;
+	unsigned long errCtr = 0;
 
 	if (!realm || !acch)
 		return EINVAL;
@@ -116,7 +118,7 @@ static int accounts_getall(const char *realm, restund_db_account_h *acch,
 	default:
 		err = query(&res,
 			    "SELECT CONCAT(username, '@', domain), ha1b "
-			    "FROM subscriber where domain = '%s';",
+			    "FROM subscriber where domain = '%s' AND deleted=0;",
 			    realm);
 		restund_info("mysql: goind to load users from domain '%s'; err=%d\n",
 			     realm, err);
@@ -139,15 +141,19 @@ static int accounts_getall(const char *realm, restund_db_account_h *acch,
 
 		//restund_info("mysql: loadedUser [%s]\n", row[0] ? row[0] : "");
 		err = acch(row[0] ? row[0] : "", row[1] ? row[1] : "", arg);
+		if (err == 0){
+			ctr += 1;
+		} else {
+			errCtr += 1;
+		}		
 
 		// aaah ignore this stupid errors...
 		err = 0;
 	}
 	
-	restund_info("mysql: err after load [%d] [%s]\n", err, mysql_error(&my.mysql));
+	restund_info("mysql: err after load [%d] loaded=%lu, errCtr=%lu\n", err, ctr, errCtr);
 
 	mysql_free_result(res);
-	restund_info("mysql: err after free [%d]\n", err);
 	return err;
 }
 

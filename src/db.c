@@ -226,6 +226,9 @@ static void *database_thread(void *arg)
 {
 	struct timespec ts;
 	int err = 0;
+	struct timeval tm1;
+	struct timeval tm2;
+	unsigned long long timeDiff = 0llu;
 	(void)arg;
 
 	gettimespec(&ts, 0);
@@ -250,9 +253,13 @@ static void *database_thread(void *arg)
 
 		if (err != ETIMEDOUT)
 			continue;
-
+		
+		gettimeofday(&tm1, NULL);
 		(void)sync_credentials();
-		restund_info("sync_credentials in DB thread\n");
+		gettimeofday(&tm2, NULL);
+		timeDiff = 1000 * (tm2.tv_sec - tm1.tv_sec) + (tm2.tv_usec - tm1.tv_usec) / 1000;
+		
+		restund_info("sync_credentials in DB thread, spent time: %llu ms\n", timeDiff);
 		gettimespec(&ts, database.cred.syncint);
 	}
 
