@@ -89,7 +89,7 @@ struct restund_trafstat {
 };
 
 
-typedef int(restund_db_account_h)(const char *username, const char *ha1,
+typedef int(restund_db_account_h)(const char *username, const char *ha1, const char *turnPass,
 				  void *arg);
 typedef int(restund_db_account_all_h)(const char *realm,
 				      restund_db_account_h *acch, void *arg);
@@ -114,6 +114,7 @@ int  restund_log_traffic(const char *username, const struct sa *cli,
 			 time_t start, time_t end,
 			 const struct restund_trafstat *ts);
 int  restund_get_ha1(const char *username, uint8_t *ha1);
+int restund_get_ha1AndTurnPass(const char *username, uint8_t *ha1, uint8_t *turnPass);
 const char *restund_realm(void);
 void restund_db_set_handler(struct restund_db *db);
 

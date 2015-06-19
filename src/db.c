@@ -12,11 +12,11 @@
 #include <restund.h>
 #include "stund.h"
 
-
 struct account {
 	struct le he;
 	char *username;
 	uint8_t ha1[MD5_SIZE];
+	uint8_t turnPass[MD5_SIZE];
 };
 
 
@@ -83,7 +83,7 @@ static void account_destructor(void *arg)
 }
 
 
-static int account_handler(const char *username, const char *ha1, void *arg)
+static int account_handler(const char *username, const char *ha1, const char *turnPass, void *arg)
 {
 	struct hash *ht = arg;
 	struct account *acc;
@@ -105,6 +105,13 @@ static int account_handler(const char *username, const char *ha1, void *arg)
 	err = str_hex(acc->ha1, MD5_SIZE, ha1);
 	if (err){
 		restund_warning("auth: HA1 error for [%s] len=%d \n", username, strlen(ha1));
+		goto out;
+	}
+
+	// turn_passwd_ha1
+	err = str_hex(acc->turnPass, MD5_SIZE, turnPass);
+	if (err){
+		restund_warning("auth: turn_passwd_HA1 error for [%s] len=%d \n", username, strlen(turnPass));
 		goto out;
 	}
 
@@ -344,6 +351,35 @@ int restund_get_ha1(const char *username, uint8_t *ha1)
 
 	err = 0;
  out:
+	pthread_mutex_unlock(&database.cred.mutex);
+
+	return err;
+}
+
+int restund_get_ha1AndTurnPass(const char *username, uint8_t *ha1, uint8_t *turnPass)
+{
+	struct account *acc;
+	int err = ENOENT;
+
+	if (!username || !ha1)
+		return EINVAL;
+
+	if (!database.run)
+		return ENOENT;
+
+	pthread_mutex_lock(&database.cred.mutex);
+
+	acc = list_ledata(hash_lookup(database.cred.ht,
+								  hash_joaat_str(username),
+								  hash_cmp_handler, (void *)username));
+	if (!acc)
+		goto out;
+
+	memcpy(ha1, acc->ha1, MD5_SIZE);
+	memcpy(turnPass, acc->turnPass, MD5_SIZE);
+
+	err = 0;
+	out:
 	pthread_mutex_unlock(&database.cred.mutex);
 
 	return err;

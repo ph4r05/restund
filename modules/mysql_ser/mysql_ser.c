@@ -110,14 +110,14 @@ static int accounts_getall(const char *realm, restund_db_account_h *acch,
 
 	case 2:
 		err = query(&res,
-			    "SELECT auth_username, ha1 "
+			    "SELECT auth_username, ha1, ha1 "
 			    "FROM credentials WHERE realm = '%s';",
 			    realm);
 		break;
 
-	default:
+		default: // TODO: rename column to turn_passwd_ha1b
 		err = query(&res,
-			    "SELECT CONCAT(username, '@', domain), ha1b "
+			    "SELECT CONCAT(username, '@', domain), ha1b, turn_passwd_ha1 "
 			    "FROM subscriber where domain = '%s' AND deleted=0;",
 			    realm);
 		restund_info("mysql: goind to load users from domain '%s'; err=%d\n",
@@ -139,8 +139,7 @@ static int accounts_getall(const char *realm, restund_db_account_h *acch,
 		if (!row)
 			break;
 
-		//restund_info("mysql: loadedUser [%s]\n", row[0] ? row[0] : "");
-		err = acch(row[0] ? row[0] : "", row[1] ? row[1] : "", arg);
+		err = acch(row[0] ? row[0] : "", row[1] ? row[1] : "", row[2] ? row[2] : "", arg);
 		if (err == 0){
 			ctr += 1;
 		} else {
@@ -151,7 +150,7 @@ static int accounts_getall(const char *realm, restund_db_account_h *acch,
 		err = 0;
 	}
 	
-	restund_info("mysql: err after load [%d] loaded=%lu, errCtr=%lu\n", err, ctr, errCtr);
+	restund_info("mysql: Load finished. Err after load=%d, loadedOK=%lu, loadedFail=%lu, version: %u\n", err, ctr, errCtr, my.version);
 
 	mysql_free_result(res);
 	return err;

@@ -92,7 +92,9 @@ static bool request_handler(struct restund_msgctx *ctx, int proto, void *sock,
 	struct stun_attr *mi, *user, *realm, *nonce;
 	const time_t now = time(NULL);
 	char nstr[NONCE_MAX_SIZE + 1];
+	uint8_t pass2[MD5_SIZE];
 	int err;
+	int passInvalid =0;
 	(void)dst;
 
 	if (ctx->key)
@@ -143,7 +145,7 @@ static bool request_handler(struct restund_msgctx *ctx, int proto, void *sock,
 
 	ctx->keylen = MD5_SIZE;
 
-	if (restund_get_ha1(user->v.username, ctx->key)) {
+	if (restund_get_ha1AndTurnPass(user->v.username, ctx->key, pass2)) {
 		restund_info("auth: unknown user '%s' (%j)\n",
 			     user->v.username, src);
 		err = stun_ereply(proto, sock, src, 0, msg,
@@ -155,9 +157,20 @@ static bool request_handler(struct restund_msgctx *ctx, int proto, void *sock,
 		goto unauth;
 	}
 
-	if (stun_msg_chk_mi(msg, ctx->key, ctx->keylen)) {
-		restund_info("auth: bad password for user '%s' (%j)\n",
-			     user->v.username, src);
+	// Auth extension here, we support two passwords for now. ha1 and turnPassword.
+	passInvalid = stun_msg_chk_mi(msg, ctx->key, ctx->keylen);
+	if (passInvalid){
+		restund_info("auth: user '%s' invalid ha1 (%j), using pass2[0]: %x, ret=%d \n", user->v.username, src, pass2[0], passInvalid);
+		passInvalid = stun_msg_chk_mi(msg, pass2, MD5_SIZE);
+		if (!passInvalid){
+			memcpy(ctx->key, pass2, MD5_SIZE);
+			restund_info("auth: user '%s' uses turn_passwd_ha1 successfully (%j)\n", user->v.username, src);
+		}
+	}
+
+	if (passInvalid) {
+		restund_info("auth: bad password for user '%s' (%j), ret=%d\n",
+			     user->v.username, src, passInvalid);
 		err = stun_ereply(proto, sock, src, 0, msg,
 				  401, "Unauthorized",
 				  NULL, 0, ctx->fp, 3,
