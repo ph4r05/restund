@@ -115,9 +115,9 @@ static int accounts_getall(const char *realm, restund_db_account_h *acch,
 			    realm);
 		break;
 
-		default: // TODO: rename column to turn_passwd_ha1b
+		default:
 		err = query(&res,
-			    "SELECT CONCAT(username, '@', domain), ha1b, turn_passwd_ha1 "
+			    "SELECT CONCAT(username, '@', domain), ha1b, turn_passwd_ha1b "
 			    "FROM subscriber where domain = '%s' AND deleted=0;",
 			    realm);
 		restund_info("mysql: goind to load users from domain '%s'; err=%d\n",
