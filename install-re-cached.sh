@@ -1,6 +1,5 @@
 #!/bin/sh
 set -e
-/bin/rm -rf "$HOME/re"
 # check to see if RE folder is empty
 if [ ! -d "$HOME/re/lib" ]; then
   /bin/rm -rf re-0.4.14.tar.gz re-0.4.14 | echo "Not deleted"
