@@ -33,7 +33,6 @@ LIBRE_MK  := $(shell [ -f ~/re/share/re/re.mk ] && \
 	echo "~/re/share/re/re.mk")
 endif
 
-echo $(LIBRE_MK)
 include $(LIBRE_MK)
 
 # Optional syslog module
