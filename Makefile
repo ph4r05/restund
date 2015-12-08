@@ -18,8 +18,8 @@ VERSION   := $(VER_MAJOR).$(VER_MINOR).$(VER_PATCH)
 MODULES	  := binding auth turn stat status
 MODULES	  += $(EXTRA_MODULES)
 
-LIBRE_MK  := $(shell [ -f ../re/mk/re.mk ] && \
-	echo "../re/mk/re.mk")
+LIBRE_MK  := $(shell [ -f ~/re/share/re/re.mk ] && \
+	echo "~/re/share/re/re.mk")
 ifeq ($(LIBRE_MK),)
 LIBRE_MK  := $(shell [ -f /usr/share/re/re.mk ] && \
 	echo "/usr/share/re/re.mk")
@@ -29,8 +29,8 @@ LIBRE_MK  := $(shell [ -f /usr/local/share/re/re.mk ] && \
 	echo "/usr/local/share/re/re.mk")
 endif
 ifeq ($(LIBRE_MK),)
-LIBRE_MK  := $(shell [ -f ~/re/share/re/re.mk ] && \
-	echo "~/re/share/re/re.mk")
+LIBRE_MK  := $(shell [ -f ../re/mk/re.mk ] && \
+	echo "../re/mk/re.mk")
 endif
 
 include $(LIBRE_MK)
@@ -85,14 +85,14 @@ all: $(MOD_BINS) $(BIN)
 $(BIN): $(OBJS)
 	@echo "  LD      $@"
 ifneq ($(GPROF),)
-	@$(LD) $(LFLAGS) $(APP_LFLAGS) $^ ../re/libre.a $(LIBS) -o $@
+	$(LD) $(LFLAGS) $(APP_LFLAGS) $^ ../re/libre.a $(LIBS) -o $@
 else
-	@$(LD) $(LFLAGS) $(APP_LFLAGS) $^ -L$(LIBRE_SO) -lre $(LIBS) -o $@
+	$(LD) $(LFLAGS) $(APP_LFLAGS) $^ -L$(LIBRE_SO) -lre $(LIBS) -o $@
 endif
 
 $(BUILD)/%.o: %.c $(BUILD) Makefile $(APP_MK)
 	@echo "  CC      $@"
-	@$(CC) $(CFLAGS) -o $@ -c $< $(DFLAGS)
+	$(CC) $(CFLAGS) -o $@ -c $< $(DFLAGS)
 
 $(BUILD): Makefile
 	@mkdir -p $(BUILD)/src $(MOD_BLD)

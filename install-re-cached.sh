@@ -7,7 +7,7 @@ if [ ! -d "$HOME/re/lib" ]; then
   tar -xzvf re-0.4.14.tar.gz
   cd re-0.4.14
   sed -i.bu "s#/usr/local#${HOME}/re#g" Makefile
-  make && make install
+  make info && make && make install
   sed -i.bu "s#LIBRE_PATH := ../re#LIBRE_PATH := $HOME/re#g" $HOME/re/share/re/re.mk
 else
   echo 'Using cached directory.';
