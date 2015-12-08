@@ -36,5 +36,5 @@ before_install:
 script:
   - ls -las
   - ls -las $HOME/re
-  -
+  - make
 
