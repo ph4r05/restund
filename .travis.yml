@@ -13,6 +13,14 @@ cache:
   directories:
   - $HOME/re
 
+# Coverity
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "QQNP4Ns4Ob3ty49b1oW1zUuB9B5+4CYTied9eIo7VVK7Eo6Gy0TuuJW6uEHaH0OOHKMl29FlYiNYXwZHzNVJM0bXJS/G8M6VpBGluwKUy8ErqOxtfjvmQg3n4CkNPkJbdI0z8EylHKlDfyKpGzaJiIu006FowxMJQsrtd2uVmQYfwAvtGE/4xTkvnFjWvrB0hqFa1RpReZhst8EkLeFL3v9hesZ00eWckwNqEkElAeybB35r0XQJG6N8hIhxClsjx7B8jNsno7TDKD6BrVAJmmakS1QY63MFLrtB0Plx8qLQrZzk+bi5JXwVVCvxg+VjRvUzUWOglVxTVE3hr8stS0M1s8l4NuawHTqAvtQthMEpzgcY6ouKqakwSkxbg893YmnQZUZE+4p2Q1acmyHvX5HNcYI2vxNBDJknVo3AKBpQ2VZ8TGSGXQ5DVYniDTO93vsmuRfImcotxX9MNd5W66V4voq9ecqOO0UcZgf94SXaAFEuzjjw+7SOiYUjf7pSOPVMCnhFkmMmJN4ac6Cr6dFBfr2sTfkQTJ+DGa2YkHQDkUB2GpUXRkrqIOrtkXsLXQvjpQpWPqKpCfIadhDn1J87/62KHcJMqmpLFK1EmAwks4MBQDXexD+P2RvuEDnNd59pPFZ6sk7+snn2TZ7lMlrLVlanvyESqLkGy7lh7QI="
+
+
 # https://docs.travis-ci.com/user/migrating-from-legacy
 addons:
   apt:
@@ -27,6 +35,14 @@ addons:
     - cmake-data
     - libmysqlclient-dev
     - libssl-dev
+  coverity_scan:
+      project:
+        name: "ph4r05/restund"
+        description: "Build submitted by Travis CI"
+      notification_email: ph4r05@gmail.com
+      build_command_prepend: bash install-re-cached.sh
+      build_command:   make
+      branch_pattern: coverity_scan
 
 before_install:
   - echo $LANG
