@@ -36,8 +36,5 @@ before_install:
 script:
   - ls -las
   - ls -las $HOME/re
-  - export LIBRE_INC=$HOME/re/include
-  - export LIBRE_SO=$HOME/re/lib
-  - make info
-  - make
+  - make info && make
 
